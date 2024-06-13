@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-progress-bar type="indeterminate" color="primary" *ngIf="carga"></ion-progress-bar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card class="register">
+    <div class="header">
+        <ion-img src="https://firebasestorage.googleapis.com/v0/b/tienda-aia.appspot.com/o/tiendaaia-logo.jpg?alt=media&token=3c19f679-b77e-4a06-81cb-9881ad9e26de" alt="Asistencia Integral Automotriz"></ion-img>
+        <br>
+        <ion-card-subtitle>Bienvenido</ion-card-subtitle>
+        <ion-card-title>Registrarme</ion-card-title>
+    </div>
+    <ion-card-content>
+      <ion-input [(ngModel)]="correo" class="label" label="Correo" type="email" errorText="Correo incorrecto (¿Ingresaste @ o el dominio?)" label-placement="floating" fill="outline" ngModel email></ion-input>
+      <ion-input [(ngModel)]="pass" type="password" class="label" label="Contraseña" label-placement="floating" fill="outline"></ion-input>
+      <ion-input [(ngModel)]="user" class="user" label="Nombre" label-placement="floating" fill="outline"></ion-input>
+      <ion-input [(ngModel)]="birth" placeholder="DD/MM/AAAA" [maskito]="options" [maskitoElement]="maskPredicate" class="label" label="Fecha de Nacimiento" label-placement="floating" fill="outline"></ion-input>
+      <div class="buttons">
+        <ion-button color="primary" (click)="register()">
+          <ion-icon name="caret-forward-circle-outline" slot="start"></ion-icon>
+          Registrarme
+        </ion-button>
+        <ion-button color="secondary" (click)="State()">
+          <ion-icon name="enter-outline" slot="start"></ion-icon>
+          Iniciar Sesión
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

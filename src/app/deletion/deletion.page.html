@@ -1,0 +1,30 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Pago cancelado</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Pago cancelado</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-card color="light">
+    <ion-card-header>
+      <ion-card-subtitle>Estado del pago: <ion-chip color="danger">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        <ion-label>Cancelado</ion-label>
+      </ion-chip></ion-card-subtitle>
+      <ion-card-title>Has cancelado tu pago con PayPhone</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Tu carrito seguirá con los productos que agregaste. ¿No te interesó algo? Ve a la tienda o acercate al taller de AIA
+    </ion-card-content>
+  </ion-card>
+  <ion-button (click)="toGo('inicio')" expand="block" fill="clear" shape="round">
+    <ion-icon slot="start" name="home-outline"></ion-icon>
+    Volver al inicio
+  </ion-button>
+  </ion-content>
+

@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-progress-bar type="indeterminate" color="primary" *ngIf="carga"></ion-progress-bar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card class="login">
+    <div class="header">
+        <ion-img src="https://firebasestorage.googleapis.com/v0/b/tienda-aia.appspot.com/o/tiendaaia-logo.jpg?alt=media&token=3c19f679-b77e-4a06-81cb-9881ad9e26de" alt="Asistencia Integral Automotriz"></ion-img>
+        <br>
+        <ion-card-subtitle>¡Oh No!</ion-card-subtitle>
+        <ion-card-title>Recuperar contraseña</ion-card-title>
+    </div>
+    <ion-card-content>
+      <ion-label>Ingresa tu correo aquí, te enviaremos un enlace para recuperar tu contraseña</ion-label>
+      <ion-input [(ngModel)]="user" class="label" label="Correo electrónico" label-placement="floating" fill="outline"></ion-input>
+      <div class="buttons">
+        <ion-button color="primary" (click)="olvideContra()">
+          <ion-icon name="send-outline" slot="start"></ion-icon>
+          Enviar
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  
+</ion-content>

@@ -1,0 +1,7 @@
+{
+  "name": "Tienda-AIA",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

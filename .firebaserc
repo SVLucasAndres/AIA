@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "tienda-aia": {
+      "hosting": {
+        "app": [
+          "tienda-aia"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "tienda-aia"
+  }
+}

@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>¡Pago exitoso!</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">¡Pago exitoso!</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-card color="light">
+    <ion-toolbar>
+      <ion-title><ion-chip color="success">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <ion-label>ÉXITO</ion-label>
+      </ion-chip></ion-title>
+    </ion-toolbar>
+    <ion-card-header>
+      <ion-card-subtitle>Muchas Gracias por tu compra</ion-card-subtitle>
+      <ion-card-title>Has pagado tu orden correctamente</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <strong>Si tienes que ir a retirar el pedido,</strong> espera a que tu orden se encuentre en estado "Listo" y podrás ir a retirarlo.<br>
+      <strong>Si pediste envío,</strong> espera a que tu orden se encuentre en estado "Listo" y a que te llegue un mensaje con las indicaciones por WhatsApp.<br>
+      <strong>Puedes saber si tu pedido está Listo cuando recibas la factura de tu compra</strong><br>
+
+      
+    </ion-card-content>
+
+  </ion-card>
+  <ion-button (click)="toGo('inicio')" expand="block" fill="clear" shape="round">
+    <ion-icon slot="start" name="home-outline"></ion-icon>
+    Volver al inicio
+  </ion-button>
+  </ion-content>
