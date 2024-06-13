@@ -78,9 +78,10 @@ export class InicioPage implements OnInit {
                 const price = data.precio;
                 const prod = data.reserva.substring(0,data.reserva.length-2);
                 const qr = element.key;
+                const fecha = data.fecha
                 this.enlacewa = 'https://wa.me/593990586160?text=Buenas%20tardes,%20estoy%20en%20camino%20a%20retirar%20mi%20pedido%20de%20'+ prod.replace(/ /g,'%20') + '%20que%20tiene%20como%20método%20de%20pago%20en%20'+ data.metodo+'.%20Muchas%20gracias';
                 console.log(this.enlacewa);
-                this.pedidos.push({state,price,prod,qr});
+                this.pedidos.push({state,price,prod,qr, fecha});
               }
             }else{
               console.log("no");
@@ -121,7 +122,9 @@ export class InicioPage implements OnInit {
   abrirMenu() {
     this.info.toggleMenu();
   }
-
+  async link(link:any){
+    await Browser.open({url:link});
+  }
   esAndroid() {
     return this.platform.is('android');
   }
@@ -145,6 +148,7 @@ interface pedido {
   precio:string,
   reserva:string,
   metodo:string,
+  fecha:string,
 }
 interface publicity{
   titulo:string,

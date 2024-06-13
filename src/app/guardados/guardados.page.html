@@ -78,8 +78,11 @@
     </ion-card-header>
     <ion-card-content>
       <div>
-        <div>- Factura a nombre de: {{pedido.cus}} ( {{pedido.ci}} ) <br> - Método de pago <strong>{{pedido.method}}</strong></div>
+        <div>- Factura a nombre de: {{pedido.cus}} ( {{pedido.ci}} ) <br> - Método de pago <strong>{{pedido.method}}</strong> <br> - Fecha de pedido <strong>{{pedido.fecha}}</strong></div>
       </div>
+      <ion-button color="dark" shape="round"  *ngIf="pedido.method != 'Efectivo' && (pedido.state=='Listo' || pedido.state=='Completado')" (click)="downloadFile(pedido.qr)">
+        Descargar Factura
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

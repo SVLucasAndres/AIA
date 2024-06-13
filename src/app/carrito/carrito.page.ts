@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { InfoService } from '../info.service';
-import { MenuController, NavController, Platform } from '@ionic/angular';
+import { AlertController, MenuController, NavController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { get, ref, remove, set, update } from 'firebase/database';
 import { Database, object } from '@angular/fire/database';
@@ -33,7 +33,7 @@ export class CarritoPage implements OnInit {
   telefono:any;
   retiro:any;
   isModalOpen = false;
-  constructor(private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
+  constructor(private alert:AlertController,private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
   async manual() {
     await Browser.open({ url: 'https://able-duckling-809.notion.site/CARLA-tu-asistente-virtual-para-ni-os-con-S-ndrome-de-Down-4567f96b3dd54d988bae669b77230216?pvs=25' });
   };
@@ -166,8 +166,9 @@ export class CarritoPage implements OnInit {
                                       for(const item of this.carritoItems){
                                         this.productoString += item.cuant+ ' ' + item.name;
                                       }
+                                      const fecha = new Date().toLocaleDateString();
                                       console.log("Code: "+code+'Productos: '+this.productoString);
-                                      set(ref(this.database,'pedidos/'+ this.uid + code),{estado: 'Por reservar', reserva: this.productoString, precio: this.finalPrice , cliente: billingData.nombre, cedula: billingData.cedula, metodo:data});
+                                      set(ref(this.database,'pedidos/'+ this.uid + code),{estado: 'Por reservar', reserva: this.productoString, precio: this.finalPrice , cliente: billingData.nombre, cedula: billingData.cedula, metodo: data, direccion: billingData.direccion, celular:billingData.telefono, mail:billingData.correo, fecha:fecha});
                                       this.info.presentAlert('Proceso finalizado','Desde que el estado de tu orden sea Listo, estará reservada por 5 días. Acude al taller de Asistencia Integral Automotriz para retirarla y emitir la factura. Debes mostrar el código QR del pedido en la sección "Mis pedidos". ¡Gracias por tu compra!',[
                                         {
                                           text:'Aceptar',
@@ -394,8 +395,7 @@ export class CarritoPage implements OnInit {
     );
   }
   
-  
-  ngOnInit() {
+  presentAlertBill(){
     const billingData = {
       cedula: this.cedula,
       nombre: this.nombre,
@@ -404,85 +404,87 @@ export class CarritoPage implements OnInit {
       direccion: this.direccion,
       method: this.method
     };
+    this.info.presentAlertInput(
+      'Paso Extra',
+      'Ingresa tus datos de facturación nuevamente para su confirmación',
+      [
+        {
+          text: 'Siguiente',
+          handler: (data: any) => {
+            billingData.cedula = data[0];
+            billingData.nombre = data[1];
+            billingData.correo = data[2];
+            billingData.telefono = data[3];
+            billingData.direccion = data[4];
+            billingData.method = data[5];
+            if((billingData.method=='Crédito' || billingData.method == 'Débito')){
+              this.info.presentAlert('¡Exito!','Si tienes que ir a retirar el pedido, espera a que tu orden se encuentre en estado "Listo" y podrás ir a retirarlo. Si pediste envío, espera a que tu orden se encuentre en estado "Listo" y a que te llegue un mensaje con las indicaciones por WhatsApp. Puedes saber si tu pedido está Listo cuando recibas la factura de tu compra',['OK'])
+            set(ref(this.database,'clients/'),{});
+            const code = this.generateRandomId(12);
+            for(const item of this.carritoItems){
+              this.productoString += item.cuant + ' ' + item.name + ', ';
+              const route1 = ref(this.database, 'productos');
+              const subscription = object(route1).subscribe(async attributes => {
+                this.carritoItems= [];
+                attributes.snapshot.forEach(element => {
+                  const dato = element.val() as datauser;
+                  const cantidad = dato.cantidad - item.cuant;
+                  if(item.name == dato.producto){
+                    console.log("cantidad: " + cantidad);
+                    update(ref(this.database,'productos/'+item.name),{cantidad: cantidad})
+                  }
+                });
+                subscription.unsubscribe();
+                
+              });
+            }
+            console.log("Code: "+code+'Productos: '+this.productoString);
+            const fecha = new Date().toLocaleDateString();
+            console.log("fecha: "+fecha);
+            set(ref(this.database,'pedidos/'+ this.uid + code),{estado: 'Por reservar', reserva: this.productoString, precio: this.finalPrice , cliente: billingData.nombre, cedula: billingData.cedula, metodo: billingData.method, direccion: billingData.direccion, celular:billingData.telefono, mail:billingData.correo, fecha:fecha});
+            }else{
+              this.info.presentToast('El tipo de tarjeta es incorrecto (Débito/Crédito)','top','danger','close-circle-outline');
+              this.presentAlertBill();
+            }
+          }
+        }
+    ],
+    [
+      {
+        placeholder: 'Cédula',
+        attributes: { maxlength: 10 , minlength:10},
+        value: billingData.cedula
+      },
+      {
+        placeholder: 'Razón Social',
+        value: billingData.nombre
+      },
+      {
+        placeholder: 'Correo electrónico',
+        value: billingData.correo
+      },
+      {
+        placeholder: 'Celular',
+        value: billingData.telefono
+      },
+      {
+        placeholder: 'Dirección',
+        value: billingData.direccion
+      },
+      {
+        placeholder: 'Tipo de tarjeta (Crédito/Débito)',
+        value:billingData.method,
+      }
+    ])
+    
+  }
+  ngOnInit() {
+    
     const urlParams = new URLSearchParams(window.location.search);
     const successId = urlParams.get('id');
     const clientTransactionId = urlParams.get('clientTransactionId');
     if (successId && clientTransactionId) {
-      this.info.presentAlertInput(
-        'Paso 1',
-        'Ingresa tus datos de facturación (No nos responsabilizamos de información falsa)',
-        [
-          {
-            text: 'Salir',
-            handler: () => {
-              console.log("canceló");
-            }
-          },
-          {
-            text: 'Siguiente',
-            handler: (data: any) => {
-              billingData.cedula = data[0];
-              billingData.nombre = data[1];
-              billingData.correo = data[2];
-              billingData.telefono = data[3];
-              billingData.direccion = data[4];
-              billingData.method = data[5];
-              this.info.presentAlert('¡Exito!','Si tienes que ir a retirar el pedido, espera a que tu orden se encuentre en estado "Listo" y podrás ir a retirarlo. Si pediste envío, espera a que tu orden se encuentre en estado "Listo" y a que te llegue un mensaje con las indicaciones por WhatsApp. Puedes saber si tu pedido está Listo cuando recibas la factura de tu compra',['OK'])
-              set(ref(this.database,'clients/'),{});
-              const code = this.generateRandomId(12);
-              for(const item of this.carritoItems){
-                this.productoString += item.cuant + ' ' + item.name + ', ';
-                const route1 = ref(this.database, 'productos');
-                const subscription = object(route1).subscribe(async attributes => {
-                  this.carritoItems= [];
-                  attributes.snapshot.forEach(element => {
-                    const dato = element.val() as datauser;
-                    const cantidad = dato.cantidad - item.cuant;
-                    if(item.name == dato.producto){
-                      console.log("cantidad: " + cantidad);
-                      update(ref(this.database,'productos/'+item.name),{cantidad: cantidad})
-                    }
-                  });
-                  subscription.unsubscribe();
-                  
-                });
-              }
-              console.log("Code: "+code+'Productos: '+this.productoString);
-              const fecha = new Date().toLocaleDateString();
-              console.log("fecha: "+fecha);
-              set(ref(this.database,'pedidos/'+ this.uid + code),{estado: 'Por reservar', reserva: this.productoString, precio: this.finalPrice , cliente: billingData.nombre, cedula: billingData.cedula, metodo: billingData.method, direccion: billingData.direccion, celular:billingData.telefono, mail:billingData.correo, fecha:fecha});
-            }
-          }
-      ],
-      [
-        {
-          placeholder: 'Cédula',
-          attributes: { maxlength: 10 , minlength:10},
-          value: billingData.cedula
-        },
-        {
-          placeholder: 'Razón Social',
-          value: billingData.nombre
-        },
-        {
-          placeholder: 'Correo electrónico',
-          value: billingData.correo
-        },
-        {
-          placeholder: 'Celular',
-          value: billingData.telefono
-        },
-        {
-          placeholder: 'Dirección',
-          value: billingData.direccion
-        },
-        {
-          placeholder: 'Tipo de tarjeta',
-          value:billingData.method,
-        }
-      ])
-      
-      
+      this.presentAlertBill();
     }
     this.updateGlobalVariables();
     this.carga=true;
@@ -494,7 +496,7 @@ export class CarritoPage implements OnInit {
         this.carga = true;
         console.log('clients/' + this.uid + '/carrito');
         const route = await ref(this.database, 'clients/'+this.uid+'/carrito');
-        
+        this.carritoItems = [];
         object(route).subscribe(attributes => {
           this.carritoNumber = 0;
           this.carritoItems = [];
@@ -557,13 +559,14 @@ export class CarritoPage implements OnInit {
     const route = ref(this.database, 'clients/' + this.uid + '/carrito');
     const carritoSnapshot = await get(route);
     const carritoData = carritoSnapshot.val();
-    
+    this.carritoItems = [];
     if (carritoData) {
       const dato = carritoData[product] as datacar;
       this.carritoItems = [];
       await remove(ref(this.database, 'clients/' + this.uid + '/carrito/' + product));
     } else {
       console.log('No hay datos en el carrito');
+      this.carritoItems = [];
     }
     this.carga=false;
   }
@@ -574,18 +577,22 @@ export class CarritoPage implements OnInit {
     const carritoData = carritoSnapshot.val();
     
     if (carritoData) {
+      this.carritoItems = [];
       const dato = carritoData[product] as datacar;
       this.carritoItems = [];
       if (dato && dato.cantidad > 0) {
         const newCantidad = dato.cantidad - 1;
         if (newCantidad > 0) {
           await update(ref(this.database, 'clients/' + this.uid + '/carrito/' + product), { cantidad: newCantidad });
+          this.carritoItems = [];
         } else {
           await remove(ref(this.database, 'clients/' + this.uid + '/carrito/' + product));
+          this.carritoItems = [];
         }
       }
     } else {
       console.log('No hay datos en el carrito');
+      this.carritoItems = [];
     }
     this.carga=false;
   }

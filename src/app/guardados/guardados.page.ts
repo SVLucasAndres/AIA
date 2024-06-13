@@ -4,8 +4,13 @@ import { MenuController, NavController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Database, object } from '@angular/fire/database';
 import { endAt, orderByChild, orderByKey, query, ref, startAt } from 'firebase/database';
-import { map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Browser } from '@capacitor/browser';
+import {AngularFireStorage } from '@angular/fire/compat/storage';
+import { HttpClient } from '@angular/common/http';
+import { File } from '@awesome-cordova-plugins/file/ngx';
+import { FileTransfer, FileTransferObject } from '@awesome-cordova-plugins/file-transfer/ngx';
+import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
 
 @Component({
   selector: 'app-guardados',
@@ -16,14 +21,27 @@ export class GuardadosPage implements OnInit {
   async manual() {
     await Browser.open({ url: 'https://wa.me/593990586160' });
   };
+  fact:boolean = true;
   datos: any[] = [];
   carga: boolean = false;
   private menuAbierto = false;
   uid:any;
   carritoNumber:number = 0;
   pedidos:any[] = [];
-  constructor(private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
-
+  constructor(private androidPermissions: AndroidPermissions,private http: HttpClient,private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController, private store:AngularFireStorage,private file: File, private transfer: FileTransfer) { }
+  refFile(filePath: string): Observable<string> {
+    const fileRef = this.store.ref(filePath);
+    return fileRef.getDownloadURL();
+  }
+  async downloadFile(nombre:any) {
+    const filePath = 'facturas/'+nombre+'.pdf'; // Cambia esto por el path de tu archivo en Firebase Storage
+    await this.refFile(filePath).subscribe(async url => {
+      await Browser.open({ url:url });
+    }, (error) => {
+      console.error('Error descargando archivo', error);
+    });
+  }
+  
   ngOnInit() {
     this.info.getUid().subscribe(async res => {
       if (res != null) {
@@ -33,7 +51,7 @@ export class GuardadosPage implements OnInit {
         console.log('clients/' + this.uid + '/carrito');
         const route = await ref(this.database, 'clients/'+this.uid+'/carrito');
         
-        object(ref(this.database,'pedidos')).subscribe(attributes =>{
+        await object(ref(this.database,'pedidos')).subscribe(attributes =>{
           this.pedidos = [];
           attributes.snapshot.forEach(element=>{
             if(element.key.substring(0,28) == this.uid){
@@ -45,17 +63,22 @@ export class GuardadosPage implements OnInit {
               const cus = data.cliente;
               const method = data.metodo;
               const qr = element.key;
+              const fecha = data.fecha;
               let color;
               if(state == "Por reservar"){
                 color = 'warning';
+                this.fact = true;
               }else if(state == "Listo"){
                 color = 'success';
+                this.fact = false;
               }else if(state == "Cancelado"){
                 color = 'danger';
+                this.fact = true;
               }else if(state == "Completado"){
                 color = 'dark';
+                this.fact = false;
               }
-              this.pedidos.push({state,price,prod,ci,cus,color,method,qr});
+              this.pedidos.push({state,price,prod,ci,cus,color,method,qr,fecha});
             }else{
               console.log("no");
             }
@@ -110,4 +133,5 @@ interface pedido {
   precio:string,
   reserva:string,
   metodo:string,
+  fecha:string,
 }
