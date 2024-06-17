@@ -58,10 +58,10 @@ export class GuardadosPage implements OnInit {
               const data = element.val() as pedido;
               const state = data.estado;
               const price = data.precio;
-              const prod = data.reserva.substring(0,data.reserva.length-1);
-              const ci = data.cedula;
-              const cus = data.cliente;
-              const method = data.metodo;
+              const prod = data.reserva.substring(0,data.reserva.length);
+              const ci = data.factura.id;
+              const cus = data.factura.cliente;
+              const method = data.factura.metodo;
               const qr = element.key;
               const fecha = data.fecha;
               let color;
@@ -127,11 +127,18 @@ interface datacar {
   nombre:string
 }
 interface pedido {
-  cedula:string,
-  cliente:string,
-  estado:string,
-  precio:string,
-  reserva:string,
-  metodo:string,
-  fecha:string,
+  factura:{
+    celular:string,
+    cliente:string,
+    direccion:string,
+    id:string,
+    mail:string,
+    metodo:string,
+    tipoId:string
+  }
+  estado:string,//
+  precio:string,//
+  reserva:string,//
+  retiro:string,//
+  fecha:string,//
 }

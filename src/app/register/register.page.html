@@ -10,10 +10,57 @@
         <ion-card-title>Registrarme</ion-card-title>
     </div>
     <ion-card-content>
-      <ion-input [(ngModel)]="correo" class="label" label="Correo" type="email" errorText="Correo incorrecto (¿Ingresaste @ o el dominio?)" label-placement="floating" fill="outline" ngModel email></ion-input>
-      <ion-input [(ngModel)]="pass" type="password" class="label" label="Contraseña" label-placement="floating" fill="outline"></ion-input>
-      <ion-input [(ngModel)]="user" class="user" label="Nombre" label-placement="floating" fill="outline"></ion-input>
-      <ion-input [(ngModel)]="birth" placeholder="DD/MM/AAAA" [maskito]="options" [maskitoElement]="maskPredicate" class="label" label="Fecha de Nacimiento" label-placement="floating" fill="outline"></ion-input>
+      <ion-list inset="true">
+        <ion-list-header color="primary">
+          <ion-label>Datos personales</ion-label>
+        </ion-list-header>
+        <ion-item>
+          <ion-icon slot="start" name="person"></ion-icon>
+          <ion-input [(ngModel)]="correo" class="label" label="Correo*" type="email" errorText="Correo incorrecto (¿Ingresaste @ o el dominio?)" label-placement="floating"  ngModel email></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon slot="start" name="lock-closed"></ion-icon>
+          <ion-input [(ngModel)]="pass" type="password" class="label" label="Contraseña" label-placement="floating" ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon slot="start" name="accessibility"></ion-icon>
+          <ion-input [(ngModel)]="user" class="user" label="Nombre" label-placement="floating" ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon slot="start" name="balloon"></ion-icon>
+          <ion-input [(ngModel)]="birth" placeholder="DD/MM/AAAA" [maskito]="options" [maskitoElement]="maskPredicate" class="label" label="Fecha de Nacimiento" label-placement="floating" ></ion-input>
+        </ion-item>   
+      </ion-list>
+      <ion-note>*El correo de registro será usado para la facturación</ion-note>
+      <ion-list inset="true">
+        <ion-list-header color="tertiary">
+          <ion-label>Datos de facturación</ion-label>
+        </ion-list-header>
+        <ion-item>
+          <ion-select placeholder="Tipo de documento" interface="action-sheet" [(ngModel)]="tipoID">
+            <ion-select-option value="Cédula">Cédula de identidad</ion-select-option>
+            <ion-select-option value="RUC">R.U.C.</ion-select-option>
+            <ion-select-option value="Pasaporte">Número de pasaporte</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="id-card"></ion-icon>
+          <ion-input [(ngModel)]="ID" class="label" [label]="tipoID" label-placement="floating"  ngModel email></ion-input>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="person-outline"></ion-icon>
+          <ion-input [(ngModel)]="razonSocial" class="label" label="Razón Social" label-placement="floating" ></ion-input>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="call"></ion-icon>
+          <ion-input [(ngModel)]="telefono" [maskito]="options1" [maskitoElement]="maskPredicate" class="user" label="Celular" label-placement="floating" ></ion-input>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="location"></ion-icon>
+          <ion-input [(ngModel)]="direccion" class="label" label="Dirección" label-placement="floating" ></ion-input>
+        </ion-item>   
+      </ion-list>
+      <ion-note>No nos responsabilizamos por información falsa</ion-note>
       <div class="buttons">
         <ion-button color="primary" (click)="register()">
           <ion-icon name="caret-forward-circle-outline" slot="start"></ion-icon>

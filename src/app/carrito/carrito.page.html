@@ -1,4 +1,6 @@
 
+<div class="ion-page">
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <ion-header class="ion-no-border" [translucent]="true">
   <ion-toolbar>
@@ -9,7 +11,8 @@
     </ion-buttons>
     <ion-buttons slot="end" color="tertiary">
       <ion-button [routerLink]="['/cuenta']">
-        <ion-icon slot="icon-only" ios="id-card-outline" md="person-circle-outline"></ion-icon>
+        <ion-icon slot="start" ios="id-card-outline" md="person-circle-outline"></ion-icon>
+        Mi cuenta
       </ion-button>
     </ion-buttons>
     <ion-title>Carrito</ion-title>
@@ -88,27 +91,146 @@
     </ion-button>
   </ion-toolbar>
 </ion-footer>
-<ion-modal [isOpen]="isModalOpen" #modal backdropDismiss="false">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</div>
+<ion-modal [isOpen]="isModalOpen" #modal backdropDismiss="false" [presentingElement]="presentingElement">
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Pago con Payphone</ion-title>
+        <ion-title>Check-out</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="setOpen(false)">Cerrar</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-      <H1>PAGO CON PAYPHONE</H1>
-      <div class="mask-icon">
-        <p>Estás a punto de pagar mediante Payphone, asegurate de tener tu tarjeta de crédito o débito a mano. Cuando estés listo, haz clic en el botón de abajo. Tendrás un máximo de <b>10 MINUTOS</b> para el proceso.</p>
-        <ion-button class="cart" (click)="pagar()">
-          <ion-icon slot="start" name="card-outline"></ion-icon>
-          Ir a pagar
-        </ion-button>
-      </div>
-      
+    <ion-content class="ion-padding" *ngIf="!checkout">
+      <ion-list inset="true">
+        <ion-list-header color="light">
+          <ion-label>Información adicional</ion-label>
+        </ion-list-header>
+        <ion-item>
+          <ion-select label="Entrega" placeholder="Elige un método..." interface="action-sheet" [(ngModel)]="retiro">
+            <ion-select-option value="Retiro">Retirar en el local</ion-select-option>
+            <ion-select-option value="Envío fuera de Cuenca">Enviar fuera de Cuenca</ion-select-option>
+            <ion-select-option value="Envío dentro de Cuenca">Enviar dentro de Cuenca</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-select [disabled]="!retiro" label="Método de pago" placeholder="Elige un método..." interface="action-sheet" [(ngModel)]="method">
+            <ion-select-option value="Efectivo" *ngIf="retiro=='Retiro'">En efectivo</ion-select-option>
+            <ion-select-option value="Transferencia">Por transferencia (Banco del Pacífico)</ion-select-option>
+            <ion-select-option value="Crédito">Con tarjeta de crédito</ion-select-option>
+            <ion-select-option value="Débito">Con tarjeta de débito</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <ion-note>Tus datos de facturación puedes cambiarlos en "Mi cuenta"</ion-note>
+      <ion-list inset="true" *ngIf="retiro!=null && method!=null">
+        <ion-list-header color="warning">
+          <ion-label>Antes de realizar tu pago</ion-label>
+        </ion-list-header>
+        <ion-item>
+          <ion-label>
+            <h2>Información importante:</h2>
+            <ion-note>Toda la información de retiro, pago y reserva se encuentra a continuación</ion-note>
+            <p *ngIf="method=='Transferencia'">
+              - Solo se permiten subir imagenes a continuación. <br>
+              - Asistencia Integral Automotriz se encargará de revisar si la imagen corresponde a un comprobante de transferencia válido y con los datos correctos. <br>
+              - En caso de que la imagen subida no corresponda a lo solicitado, el pedido será inmediatamente anulado y notificado con un mensaje a su número de teléfono. <br>
+            </p>
+            <p *ngIf="method=='Débito'">
+              - Dispone de 10 minutos para realizar la transacción. Puede hacerlo con la app de PayPhone o con la tarjeta de débito directamente<br>
+              - En un lapso de 24 horas a partir del pago realizado con éxito, usted recibirá un mensaje con las instrucciones de la entrega<br>
+            </p>
+            <p *ngIf="method=='Crédito'">
+              - Dispone de 10 minutos para realizar la transacción. Puede hacerlo con la app de PayPhone o con la tarjeta de crédito directamente<br>
+              - En un lapso de 24 horas a partir del pago realizado con éxito, usted recibirá un mensaje con las instrucciones de la entrega<br>
+            </p>
+            <p *ngIf="method=='Efectivo'">
+              - Usted dispondrá de un tiempo de 5 días después de que su pedido se encuentre en estado "Listo", pagar su reserva y retirar el producto.<br>
+              - Si no acude en ese lapso, su pedido será anulado y el stock volverá a su estado anterior.<br>
+            </p>
+            <p *ngIf="retiro=='Retiro'">
+              - Para retirar su pedido, debe mostrar el código QR generado en el apartado "Mis pedidos" o en el Inicio. <br>
+              - Pedimos encarecidamente estar pendientes al apartado "Mis pedidos" o en el Inicio para saber si su pedido está listo para ser retirado, al igual que se le enviará un mensaje al número de teléfono configurado.<br>
+            </p>
+            <p *ngIf="retiro=='Envío fuera de Cuenca'">
+              - El costo de envío dependerá del motorizado. Este costo igualmente será notificado con un mensaje a su número de teléfono. <br>
+            </p>
+            <p *ngIf="retiro=='Envío dentro de Cuenca'">
+              - El envío dentro del cantón Cuenca es gratis.
+              - Para recibir su pedido, debe mostrar el código QR generado en el apartado "Mis pedidos" o en el Inicio.
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-checkbox labelPlacement="stacked" [(ngModel)]="terms">He leído y aceptado la información importante</ion-checkbox>
+        </ion-item>
+      </ion-list>
+      <ion-list inset="true" *ngIf="terms">
+        <ion-list-header color="medium">
+          <ion-label>Pago</ion-label>
+        </ion-list-header>
+        <ion-item *ngIf="method=='Transferencia'">
+          <ion-label>
+            <h1>Datos de cuenta:</h1>
+            <p>
+              <b>Banco: </b> Pacífico <br>
+              <b>Tipo de cuenta: </b> Ahorros <br>
+              <b>Número de cuenta: </b> 7809007 <br>
+              <b>Cédula: </b> 0102959756 <br>
+              <b>Correo electrónico: </b> victor&#64;automotriz.com.ec <br>
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="method=='Transferencia'">
+           <ion-label>Comprobante de transferencia</ion-label>
+           <ion-button size="small" (click)="selectFile()" [disabled]="!terms">
+            <ion-icon slot="start" name="document-attach"></ion-icon>
+            Subir imagen
+           </ion-button>
+          <input type="file" #fileInput (change)="uploadTrans($event)" hidden accept="image/*"/>
+        </ion-item>
+        <ion-item *ngIf="method=='Transferencia'">
+          <ion-img [src]="imageUrl" alt="Aquí se mostrará la imagen a subir"></ion-img>
+        </ion-item>
+        <ion-item *ngIf="method=='Crédito' || method=='Débito'">
+          <ion-label>Pago con Payphone</ion-label>
+          <ion-button class="cart" (click)="generarPedidoTarj()" [disabled]="!terms">
+            <ion-icon slot="start" name="card-outline"></ion-icon>
+            Ir a pagar
+          </ion-button>
+        </ion-item>
+        <ion-item *ngIf="method=='Efectivo'">
+          <p>El pago se lo realizará en el local, cuando el estado de su pedido sea "Listo"</p>
+        </ion-item>
+      </ion-list>
+      <ion-button [disabled]="!terms" expand="block" shape="round" *ngIf="method == 'Efectivo'" (click)="reservar()">
+        Completar proceso
+      </ion-button>
+      <ion-button [disabled]="!(imageUrl!='-')" expand="block" shape="round" *ngIf="method == 'Transferencia'" (click)="reservar()">
+        Completar proceso
+      </ion-button>
+    </ion-content>
+    <ion-content class="ion-padding" *ngIf="checkout">
+      <ion-card color="light" >
+        <ion-toolbar>
+          <ion-title><ion-chip color="success">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <ion-label>ÉXITO</ion-label>
+          </ion-chip></ion-title>
+        </ion-toolbar>
+        <ion-card-header>
+          <ion-card-subtitle>Muchas Gracias por tu compra</ion-card-subtitle>
+          <ion-card-title>Has completado el proceso de pedido</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <strong>Si tienes que ir a retirar el pedido,</strong> espera a que tu orden se encuentre en estado "Listo" y podrás ir a retirarlo.<br>
+          <strong>Si pediste envío,</strong> espera a que tu orden se encuentre en estado "Listo" y a que te llegue un mensaje con las indicaciones por WhatsApp.<br>
+        </ion-card-content>
+      </ion-card>
     </ion-content>
   </ng-template>
 </ion-modal>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

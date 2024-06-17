@@ -15,6 +15,7 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { getDatabase, provideDatabase } from '@angular/fire/database';
 import Swiper from 'swiper';
 import { HttpClientModule } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,12 +26,14 @@ import { HttpClientModule } from '@angular/common/http';
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
-    HttpClientModule  
+    HttpClientModule 
   ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
-    provideStorage(() => getStorage())],
+    provideStorage(() => getStorage()),
+  Storage],
+    
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

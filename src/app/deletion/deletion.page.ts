@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
+import { InfoService } from '../info.service';
 
 @Component({
   selector: 'app-deletion',
@@ -8,10 +9,12 @@ import { NavController } from '@ionic/angular';
   styleUrls: ['./deletion.page.scss'],
 })
 export class DeletionPage implements OnInit {
+  
+  constructor(private router:Router, private navCtrl:NavController, private info:InfoService) { }
 
-  constructor(private router:Router, private navCtrl:NavController) { }
-
-  ngOnInit() {
+  async ngOnInit() {
+    
+    await this.info.eliminarPedido();
   }
   toGo(tabName:string){
     this.router.navigate([tabName]);

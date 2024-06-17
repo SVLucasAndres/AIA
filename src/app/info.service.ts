@@ -1,10 +1,14 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Database } from '@angular/fire/database';
 import { Firestore } from '@angular/fire/firestore';
-import { AlertController, MenuController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, MenuController, NavController, ToastController } from '@ionic/angular';
+import { Storage } from '@ionic/storage';
+import { ref, remove } from 'firebase/database';
 
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -12,14 +16,20 @@ import { Observable } from 'rxjs';
 })
 
 export class InfoService {
+  async eliminarPedido(){
+    await this.storage.create();
+    const uid = await this.storage.get('uid');
+    await this.storage.create();
+    remove(ref(this.database,'pedidos/'+ uid + await this.storage.get('code')));
+  }
   preparePayment( finalPrice: number,totalPrice: number,id:any): Observable<any> {
     const total = (totalPrice * 100);
     const subtotal = (finalPrice * 100);
     const parametros = {
-      ResponseUrl: 'https://tienda-aia.firebaseapp.com/carrito',
-      CancellationUrl:'https://tienda-aia.firebaseapp.com/deletion',
+      ResponseUrl: 'http://localhost:8100/carrito',
+      CancellationUrl:'http://localhost:8100/deletion',
       Amount: total,
-      AmountWithTax: subtotal,
+      AmountWithTax: parseInt((subtotal).toFixed(0)),
       Tax: parseInt((subtotal*0.15).toFixed(0)),
       ClientTransactionId: id,
     };
@@ -31,8 +41,13 @@ export class InfoService {
     return this.http.post('https://pay.payphonetodoesposible.com/api/button/Prepare', parametros, { headers });
   }
   private menuAbierto = false;
-  constructor(private menuCtrl:MenuController,private route:NavController,private alertController: AlertController,private toastController:ToastController, private db:Firestore, private auth:AngularFireAuth, private http: HttpClient) {
+  constructor(private database:Database,private storage:Storage,private menuCtrl:MenuController,private route:NavController,private alertController: AlertController,private toastController:ToastController, private db:Firestore, private auth:AngularFireAuth, private http: HttpClient, private store:AngularFireStorage, private loader:LoadingController) {
     
+  }
+  agregarStorage(path: string, data: any) {
+    const fileRef = this.store.ref('transferencias/' + path);
+    const task = this.store.upload('transferencias/' + path, data);
+    return task.snapshotChanges().toPromise();
   }
   async presentToast(message:any,position: 'top' | 'middle' | 'bottom',color?:any,icon?:any, buttons?:any[]) {
     const toast = await this.toastController.create({
@@ -51,14 +66,23 @@ export class InfoService {
     this.ruta = doc(this.db,link1,link2);
     await setDoc(this.ruta,parameters);
   }
+  async actualizarBDD(link1:any,link2:any,parameters:{}){
+    this.ruta = doc(this.db,link1,link2);
+    await updateDoc(this.ruta,parameters);
+  }
   async registrar(user: string, pass: string) {
    return await this.auth.createUserWithEmailAndPassword(user, pass);   
   }
   getUid(){
     return this.auth.authState;
   }
-  mostrarCargando(){
-    
+  async mostrarCargando(){
+    const load =await  this.loader.create({
+      duration:5000,
+      spinner:'lines-sharp',
+      message:'Espere, por favor',
+    });
+    load.present();
   }
   users:any[]=[];
   async login(user: string, pass: string):Promise<any>{
@@ -137,11 +161,16 @@ export class InfoService {
       const usuario = dato.user;
       const mail = dato.mail;
       const fechaNac = dato.fechaNacimiento;
-      users.push(usuario,mail,fechaNac);
+      const tipo = dato.TipoID;
+      const id = dato.Identificacion;
+      const celular = dato.Celular;
+      const nombre = dato.RazonSocial;
+      const dir = dato.Direccion;
+      users.push(usuario,mail,fechaNac,tipo,id,celular,nombre,dir);
     });
     return users;
   }
 }
 interface Registro{
-  user:any,mail:any,fechaNacimiento:any
+  user:any,mail:any,fechaNacimiento:any,TipoID:any,Identificacion:any,Celular:any ,RazonSocial:any,Direccion:any
 }

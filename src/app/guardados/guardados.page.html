@@ -8,7 +8,8 @@
     <ion-title>Mis pedidos</ion-title>
     <ion-buttons slot="end" color="tertiary">
       <ion-button [routerLink]="['/cuenta']">
-        <ion-icon slot="icon-only" ios="id-card-outline" md="person-circle-outline"></ion-icon>
+        <ion-icon slot="start" ios="id-card-outline" md="person-circle-outline"></ion-icon>
+        Mi cuenta
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -63,12 +64,6 @@
             </ion-content>
           </ng-template>
         </ion-popover>
-      </ion-buttons>
-      <ion-buttons slot="end" *ngIf="pedido.method=='Transferencia' && pedido.state=='Por reservar'">
-        <ion-button color="success" (click)="manual()">
-          <ion-icon slot="start" name="add"></ion-icon>
-          Enviar comprobante
-        </ion-button>
       </ion-buttons>
       <ion-title><ion-chip [color]="pedido.color">Estado: {{pedido.state}}</ion-chip></ion-title>
     </ion-toolbar>

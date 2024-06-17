@@ -14,11 +14,6 @@
   <ion-grid style="width: 100%;">
     <ion-row>
       <ion-col size-sm="12" size-xs="12" size-md="6" size-lg="6" size-xl="6">
-        <ion-avatar style="width: min(30vw, 300px); height: min(30vw, 300px);">
-          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-        </ion-avatar>
-      </ion-col>
-      <ion-col size-sm="12" size-xs="12" size-md="6" size-lg="6" size-xl="6">
         <ion-list inset="true">
           <ion-list-header color="primary">
             <ion-label> <ion-icon slot="start" name="person"></ion-icon> Datos de cuenta</ion-label>
@@ -26,7 +21,6 @@
           <ion-item>
             <ion-icon slot="start" name="person-circle-outline"></ion-icon>
             <ion-label>
-              
               <h1>Nombre de usuario</h1>
               <p>{{datos[0]}}</p>
             </ion-label>
@@ -34,9 +28,63 @@
           <ion-item>
             <ion-icon slot="start" name="mail-outline"></ion-icon>
             <ion-label>
-             
               <h1>Correo</h1>
               <p>{{datos[1]}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="mail-outline"></ion-icon>
+            <ion-label>
+              <h1>Fecha de Nacimiento</h1>
+              <p>{{datos[2]}}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <ion-list inset="true">
+          <ion-list-header color="secondary">
+            <ion-label> <ion-icon slot="start" name="document-text"></ion-icon> Datos de facturación</ion-label>
+            <ion-button color="dark" (click)="setOpen(true)">Editar/agregar</ion-button>
+          </ion-list-header>
+          <ion-item>
+            <ion-icon slot="start" name="information"></ion-icon>
+            <ion-label>
+              <h1>Tipo de identificación</h1>
+              <p>{{datos[3]}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="id-card-outline"></ion-icon>
+            <ion-label>
+              <h1>Numero de identificación</h1>
+              <p>{{datos[4]}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="person-outline"></ion-icon>
+            <ion-label>
+              <h1>Razón Social</h1>
+              <p>{{datos[6]}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="mail-outline"></ion-icon>
+            <ion-label>
+              <h1>Correo electrónico</h1>
+              <p>{{datos[1]}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="call-outline"></ion-icon>
+            <ion-label>
+              <h1>Celular</h1>
+              <p>{{datos[5]}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="location-outline"></ion-icon>
+            <ion-label>
+              <h1>Dirección</h1>
+              <p>{{datos[7]}}</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -49,3 +97,45 @@
   </ion-button>
   
 </ion-content>
+<ion-modal [isOpen]="isModalOpen" #modal backdropDismiss="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Editar datos de facturación</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="setOpen(false)">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list inset="true">
+        <ion-item>
+          <ion-select placeholder="Tipo de documento" interface="action-sheet" [(ngModel)]="tipoID">
+            <ion-select-option value="Cédula">Cédula de identidad</ion-select-option>
+            <ion-select-option value="RUC">R.U.C.</ion-select-option>
+            <ion-select-option value="Pasaporte">Número de pasaporte</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="id-card"></ion-icon>
+          <ion-input [(ngModel)]="ID" class="label" [label]="tipoID" label-placement="floating"  ngModel email></ion-input>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="person-outline"></ion-icon>
+          <ion-input [(ngModel)]="razonSocial" class="label" label="Razón Social" label-placement="floating" ></ion-input>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="call"></ion-icon>
+          <ion-input [(ngModel)]="telefono" [maskito]="options1" [maskitoElement]="maskPredicate" class="user" label="Celular" label-placement="floating" ></ion-input>
+        </ion-item>
+        <ion-item *ngIf="tipoID!=null">
+          <ion-icon slot="start" name="location"></ion-icon>
+          <ion-input [(ngModel)]="direccion" class="label" label="Dirección" label-placement="floating" ></ion-input>
+        </ion-item>   
+      </ion-list>
+      <ion-button (click)="update()" expand="block" fill="clear" shape="round">
+        Actualizar datos
+      </ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>

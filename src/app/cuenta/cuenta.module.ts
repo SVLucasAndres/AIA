@@ -7,13 +7,15 @@ import { IonicModule } from '@ionic/angular';
 import { CuentaPageRoutingModule } from './cuenta-routing.module';
 
 import { CuentaPage } from './cuenta.page';
+import { MaskitoDirective } from '@maskito/angular';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    CuentaPageRoutingModule
+    CuentaPageRoutingModule,
+    MaskitoDirective
   ],
   declarations: [CuentaPage]
 })

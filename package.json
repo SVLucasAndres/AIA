@@ -40,6 +40,7 @@
     "@maskito/angular": "^2.2.0",
     "@maskito/core": "^2.2.0",
     "@maskito/kit": "^2.2.0",
+    "@maskito/phone": "^2.4.0",
     "angularx-qrcode": "^17.0.1",
     "firebase": "^10.9.0",
     "gsap": "^3.12.5",
