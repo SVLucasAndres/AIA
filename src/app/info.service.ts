@@ -26,8 +26,8 @@ export class InfoService {
     const total = (totalPrice * 100);
     const subtotal = (finalPrice * 100);
     const parametros = {
-      ResponseUrl: 'https://tienda-aia.web.app/carrito',
-      CancellationUrl:'https://tienda-aia.web.app/deletion',
+      ResponseUrl: 'https://tienda.automotriz.com.ec/carrito',
+      CancellationUrl:'https://tienda.automotriz.com.ec/deletion',
       Amount: total,
       AmountWithTax: parseInt((subtotal).toFixed(0)),
       Tax: parseInt((subtotal*0.15).toFixed(0)),

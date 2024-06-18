@@ -99,6 +99,7 @@ export class CarritoPage implements OnInit {
     await this.storage.create();
     await this.storage.set('code',code);
     await this.storage.set('uid',this.uid);
+    this.imageUrl = "-";
     this.pagar(code);
   }
   async generarPedido(){
