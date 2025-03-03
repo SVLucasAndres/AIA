@@ -3,13 +3,14 @@ import { InfoService } from '../info.service';
 import { Storage } from '@ionic/storage';
 import { AlertController, MenuController, NavController, Platform} from '@ionic/angular';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { get, ref, remove, set, update } from 'firebase/database';
 import { Database, object } from '@angular/fire/database';
 import { NgModel } from '@angular/forms';
 import {Browser} from '@capacitor/browser';
 import { totalPrice, iva, finalPrice } from '../global'; // Importar las variables globales
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-
+import { EmailComposer } from '@awesome-cordova-plugins/email-composer/ngx';
 @Component({
   selector: 'app-carrito',
   templateUrl: './carrito.page.html',
@@ -39,7 +40,24 @@ export class CarritoPage implements OnInit {
   telefono:any;
   retiro:any;
   isModalOpen = false;
-  constructor(private storage:Storage,private store:AngularFireStorage,private alert:AlertController,private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
+  constructor(private http: HttpClient,private storage:Storage,private store:AngularFireStorage,private alert:AlertController,private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
+  enviarPedido(productosPedido: { nombre: string, cantidad: number }[], cliente: string = "Cliente Anónimo", cedula: string = "N/A", celular: string = "N/A", retiro: string = "N/A", metodo: string = "N/A", imag:string = "No hay imagen") {
+    const datosPedido = {
+      cliente: cliente,
+      productos: productosPedido,
+      cedula:cedula,
+      celular:celular,
+      retiro:retiro,
+      metodo:metodo,
+      imag:imag,
+    };
+  
+    this.http.post('http://localhost:3000/send-email', datosPedido).subscribe(
+      res => console.log('Correo enviado con éxito'),
+      err => console.log('Error al enviar el correo', err)
+    );
+  }
+  
   async manual() {
     await Browser.open({ url: 'https://able-duckling-809.notion.site/CARLA-tu-asistente-virtual-para-ni-os-con-S-ndrome-de-Down-4567f96b3dd54d988bae669b77230216?pvs=25' });
   };
@@ -112,27 +130,40 @@ export class CarritoPage implements OnInit {
     set(ref(this.database,'pedidos/'+ this.uid + code),{factura:{cliente: this.datos[6], id: this.datos[4], metodo: this.method, direccion: this.datos[7], celular:this.datos[5], mail:this.datos[1], tipoId:this.datos[3], compTransferencia:this.imageUrl},estado: 'Por reservar', reserva: this.productoString, precio: this.finalPrice , fecha:fecha, retiro:this.retiro});
   }
   backdrop:boolean = true;
-  reservar(){
-    set(ref(this.database,'clients/'+this.uid),{});
+  async reservar() {
+    const productosPedido: { nombre: string, cantidad: number }[] = [];
+    set(ref(this.database, 'clients/' + this.uid), {});
     this.generarPedido();
-    for(const item of this.carritoItems){
-    const route1 = ref(this.database, 'productos');
-    const subscription = object(route1).subscribe(async attributes => {
-    this.carritoItems= [];
-    attributes.snapshot.forEach(element => {
-    const dato = element.val() as datauser;
-    const cantidad = dato.cantidad - item.cuant;
-    if(item.name == dato.producto){
-    console.log("cantidad: " + cantidad);
-    update(ref(this.database,'productos/'+item.name),{cantidad: cantidad})
-    }
-    });
-    subscription.unsubscribe();
 
+    // Creamos un array de promesas para esperar todas las suscripciones
+    const promesas = this.carritoItems.map(item => {
+        return new Promise<void>((resolve) => {
+            const route1 = ref(this.database, 'productos');
+            const subscription = object(route1).subscribe(async attributes => {
+                attributes.snapshot.forEach(element => {
+                    const dato = element.val() as datauser;
+                    const cantidad = dato.cantidad - item.cuant;
+
+                    if (item.name === dato.producto) {
+                        console.log("cantidad: " + cantidad);
+                        update(ref(this.database, 'productos/' + item.name), { cantidad: cantidad });
+                        productosPedido.push({ nombre: item.name, cantidad: item.cuant });
+                    }
+                });
+
+                subscription.unsubscribe();
+                resolve(); 
+            });
+        });
     });
-    }
-    this.checkout=true;
-  }
+
+    await Promise.all(promesas);
+
+    this.checkout = true;
+    this.enviarPedido(productosPedido, this.datos[6], this.datos[4], this.datos[5], this.retiro, this.method, this.imageUrl);
+}
+
+  
   quitaritems(){
     set(ref(this.database,'clients/'+this.uid),{});
     for(const item of this.carritoItems){
@@ -272,17 +303,18 @@ export class CarritoPage implements OnInit {
     const carritoData = carritoSnapshot.val();
     
     if (carritoData) {
-      this.carritoItems = [];
       const dato = carritoData[product] as datacar;
-      this.carritoItems = [];
+      
       if (dato && dato.cantidad > 0) {
         const newCantidad = dato.cantidad - 1;
         if (newCantidad > 0) {
+          this.carritoItems = [];
           await update(ref(this.database, 'clients/' + this.uid + '/carrito/' + product), { cantidad: newCantidad });
-          this.carritoItems = [];
+          
         } else {
-          await remove(ref(this.database, 'clients/' + this.uid + '/carrito/' + product));
           this.carritoItems = [];
+          await remove(ref(this.database, 'clients/' + this.uid + '/carrito/' + product));
+          
         }
       }
     } else {

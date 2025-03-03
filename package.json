@@ -1,5 +1,5 @@
 {
-  "name": "Tienda-AIA",
+  "name": "tienda-aia",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -23,6 +23,8 @@
     "@angular/platform-browser-dynamic": "^17.0.2",
     "@angular/router": "^17.0.2",
     "@awesome-cordova-plugins/android-permissions": "^6.7.0",
+    "@awesome-cordova-plugins/core": "^6.14.0",
+    "@awesome-cordova-plugins/email-composer": "^6.14.0",
     "@awesome-cordova-plugins/file": "^6.7.0",
     "@awesome-cordova-plugins/file-transfer": "^6.7.0",
     "@capacitor/android": "^6.0.0",
@@ -42,9 +44,14 @@
     "@maskito/kit": "^2.2.0",
     "@maskito/phone": "^2.4.0",
     "angularx-qrcode": "^17.0.1",
+    "body-parser": "^1.20.3",
+    "cordova-plugin-email-composer": "^0.10.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
     "firebase": "^10.9.0",
     "gsap": "^3.12.5",
     "ionicons": "^7.0.0",
+    "nodemailer": "^6.10.0",
     "open-factura": "^0.1.1",
     "rxjs": "~7.8.0",
     "swipe": "^1.7.7",
@@ -80,5 +87,8 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.2.2"
   },
-  "description": "An Ionic project"
+  "description": "An Ionic project",
+  "main": "karma.conf.js",
+  "keywords": [],
+  "license": "ISC"
 }

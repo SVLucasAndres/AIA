@@ -8,8 +8,12 @@
     <ion-title>Inicio</ion-title>
     <ion-buttons slot="end" color="tertiary">
       <ion-button [routerLink]="['/cuenta']">
-        <ion-icon slot="start" ios="id-card-outline" md="person-circle-outline"></ion-icon>
+        <ion-icon slot="start" ios="id-card-outline"></ion-icon>
         Mi cuenta
+      </ion-button>
+      <ion-button (click)="report()">
+        <ion-icon slot="start"  name="alert-circle-outline" ></ion-icon>
+        Reportar un problema
       </ion-button>
     </ion-buttons>
     

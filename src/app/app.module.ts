@@ -2,7 +2,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { getStorage, provideStorage } from '@angular/fire/storage';
-
+import {EmailComposer} from '@awesome-cordova-plugins/email-composer/ngx'
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
@@ -32,6 +32,7 @@ import { Storage } from '@ionic/storage';
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
     provideStorage(() => getStorage()),
+    EmailComposer,
   Storage],
     
   bootstrap: [AppComponent],

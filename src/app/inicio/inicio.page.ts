@@ -26,8 +26,22 @@ export class InicioPage implements OnInit {
   uid:any;
   constructor(private database: Database, public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
   carritoNumber: number = 0;
+  isModalOpen = false;
+  presentingElement:any = null;
   mensaje(){
      
+  }
+  async setOpen(isOpen: boolean, content?:any) {
+    this.isModalOpen = isOpen;
+  }
+  openLink = () => {
+    window.open('https://wa.me/+593990586160?text=Buen%20día,%20deseo%20reportar%20un%20problema%20en%20la%20tienda%20virtual%20de%20AIA', '_blank');
+  };
+  report(){
+    this.info.presentAlert("Reportar algun fallo", "Sabemos que para ti, como cliente, es tedioso lidiar con errores en este tipo de plataformas. Es por esto que pedimos de favor que nos ayudes con todos los detalles y/o capturas para resolverlo y mejorar. Gracias y pedimos las debidas disculpas", [
+      {text: 'Cancelar', role: 'cancel'},
+      {text: 'Reportar', handler: this.openLink}
+    ]);
   }
   async ngOnInit() {
     this.carga=true;
