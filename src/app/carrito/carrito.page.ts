@@ -21,7 +21,8 @@ export class CarritoPage implements OnInit {
   datos: any[] = [];
   botonPagar:boolean = true;
   carga: boolean = false;
-  private menuAbierto = false;
+
+  menuAbierto:boolean = false;
   uid:any;
   imageUrl:any = "-";
   terms:boolean=false;
@@ -41,7 +42,8 @@ export class CarritoPage implements OnInit {
   retiro:any;
   isModalOpen = false;
   constructor(private http: HttpClient,private storage:Storage,private store:AngularFireStorage,private alert:AlertController,private database:Database,public info: InfoService, private platform: Platform, private router: Router, private menuCtrl: MenuController, private navCtrl: NavController) { }
-  enviarPedido(productosPedido: { nombre: string, cantidad: number }[], cliente: string = "Cliente Anónimo", cedula: string = "N/A", celular: string = "N/A", retiro: string = "N/A", metodo: string = "N/A", imag:string = "No hay imagen") {
+  enviarPedido(productosPedido: { nombre: string, cantidad: number }[] | string, cliente: string = "Cliente Anónimo", cedula: string = "N/A", celular: string = "N/A", retiro: string = "N/A", metodo: string = "N/A", imag:string = "No hay imagen") {
+    
     const datosPedido = {
       cliente: cliente,
       productos: productosPedido,
@@ -51,18 +53,23 @@ export class CarritoPage implements OnInit {
       metodo:metodo,
       imag:imag,
     };
-  
-    this.http.post('http://localhost:3000/send-email', datosPedido).subscribe(
-      res => console.log('Correo enviado con éxito'),
-      err => console.log('Error al enviar el correo', err)
-    );
+    if(metodo = "Tarjeta Crédito/Débito"){
+      const apiUrl ='https://aia-1hto.onrender.com/send-email-card';
+      this.http.post(apiUrl, datosPedido).subscribe(
+        res => console.log('Correo enviado con éxito'),
+        err => console.log('Error al enviar el correo', err)
+      );
+    }else{
+      const apiUrl ='https://aia-1hto.onrender.com/send-email';
+      this.http.post(apiUrl, datosPedido).subscribe(
+        res => console.log('Correo enviado con éxito'),
+        err => console.log('Error al enviar el correo', err)
+      );
+    }
   }
   
-  async manual() {
-    await Browser.open({ url: 'https://able-duckling-809.notion.site/CARLA-tu-asistente-virtual-para-ni-os-con-S-ndrome-de-Down-4567f96b3dd54d988bae669b77230216?pvs=25' });
-  };
   async setOpen(isOpen: boolean, content?:any) {
-    this.isModalOpen = isOpen;
+    this.isModalOpen = await isOpen;
   }
   verificarcedula(cedula:string){
     let val=0;
@@ -117,7 +124,11 @@ export class CarritoPage implements OnInit {
     await this.storage.create();
     await this.storage.set('code',code);
     await this.storage.set('uid',this.uid);
+    await this.storage.set('pedido',this.productoString);
+    await this.storage.set('retiro',this.retiro);
+
     this.imageUrl = "-";
+    
     this.pagar(code);
   }
   async generarPedido(){
@@ -129,8 +140,8 @@ export class CarritoPage implements OnInit {
     console.log("Code: "+code+'Productos: '+this.productoString);
     set(ref(this.database,'pedidos/'+ this.uid + code),{factura:{cliente: this.datos[6], id: this.datos[4], metodo: this.method, direccion: this.datos[7], celular:this.datos[5], mail:this.datos[1], tipoId:this.datos[3], compTransferencia:this.imageUrl},estado: 'Por reservar', reserva: this.productoString, precio: this.finalPrice , fecha:fecha, retiro:this.retiro});
   }
-  backdrop:boolean = true;
   async reservar() {
+    
     const productosPedido: { nombre: string, cantidad: number }[] = [];
     set(ref(this.database, 'clients/' + this.uid), {});
     this.generarPedido();
@@ -153,35 +164,47 @@ export class CarritoPage implements OnInit {
 
                 subscription.unsubscribe();
                 resolve(); 
+                this.carritoItems = [];
             });
         });
     });
 
     await Promise.all(promesas);
-
+    this.menuAbierto = true;
     this.checkout = true;
+    this.carritoItems = [];
     this.enviarPedido(productosPedido, this.datos[6], this.datos[4], this.datos[5], this.retiro, this.method, this.imageUrl);
-}
+    
+  }
 
   
-  quitaritems(){
+  async quitaritems(){
+    const productosPedido: { nombre: string, cantidad: number }[] = [];
     set(ref(this.database,'clients/'+this.uid),{});
     for(const item of this.carritoItems){
     const route1 = ref(this.database, 'productos');
     const subscription = object(route1).subscribe(async attributes => {
     this.carritoItems= [];
-    attributes.snapshot.forEach(element => {
+    await attributes.snapshot.forEach(element => {
     const dato = element.val() as datauser;
     const cantidad = dato.cantidad - item.cuant;
     if(item.name == dato.producto){
-    console.log("cantidad: " + cantidad);
-    update(ref(this.database,'productos/'+item.name),{cantidad: cantidad})
-    }
+      update(ref(this.database,'productos/'+item.name),{cantidad: cantidad})
+      productosPedido.push({ nombre: item.name, cantidad: item.cuant });
+      
+      }
+      
     });
+    
     subscription.unsubscribe();
+    
 
     });
+    
     }
+    this.carritoItems = [];
+    await this.storage.create();
+    await this.enviarPedido(await this.storage.get('pedido'), this.datos[6], this.datos[4], this.datos[5], await this.storage.get('retiro'), "Tarjeta Crédito/Débito", this.imageUrl);
   }
   async pay() { //abre el modal para el checkout
     
@@ -192,11 +215,12 @@ export class CarritoPage implements OnInit {
   
   async presentAlertBill(){ //abre el modal despues de payphone
     
-    
     while(this.carritoItems.length==0){await this.info.mostrarCargando();await new Promise(resolve => setTimeout(resolve, 5000));}
     this.setOpen(true);
     this.quitaritems();
+    this.carritoItems = [];
     this.checkout=true;
+    this.menuAbierto = true;
   }
   presentingElement:any = null;
   async ngOnInit() {
@@ -340,6 +364,22 @@ export class CarritoPage implements OnInit {
   selectFile() {
     this.fileInput.nativeElement.click();
   }
+  async closeModal() {
+    if (this.menuAbierto) {
+      await this.setOpen(false); // Asegurarse de que el modal se cierre antes de continuar
+      this.menuAbierto = false;
+      
+      setTimeout(() => {
+        this.router.navigateByUrl('/inicio', { skipLocationChange: true }).then(() => {
+          this.router.navigate(['/inicio']);
+        });
+      }, 500);
+    } else {
+      await this.setOpen(false);
+      this.menuAbierto = false;
+    }
+  }
+  
 
   async uploadTrans(event: any) {
     const file = event.target.files[0];
